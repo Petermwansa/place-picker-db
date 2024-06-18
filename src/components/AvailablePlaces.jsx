@@ -1,23 +1,43 @@
 import { useEffect, useState } from 'react';
 import Places from './Places.jsx';
+import Error from './Error.jsx';
 
 export default function AvailablePlaces({ onSelectPlace}) {
 
   // here we fetch the data from the backend 
   const [availablePlaces, setAvailablePlaces] = useState([]);
   const [fetching, setisFetching] = useState(false);
+  const [error, setError] = useState();
 
   useEffect(() => {
     const fetchPlaces = async () => {
       setisFetching(true);
-      const response = await fetch("http://localhost:3000/places")
-      const resData = await response.json()
-      setAvailablePlaces(resData.places)
+
+      try {
+        const response = await fetch("http://localhost:3000/placess")
+        const resData = await response.json()
+  
+        if (!response.ok) {
+          throw new Error('failed to fetch the places')
+        }
+
+        setAvailablePlaces(resData.places)
+      } catch (error) {
+        setError({
+          message: error.message || "The places could not be fetched"
+        });
+      }
+
+
       setisFetching(false);
     }
-    
+
     fetchPlaces();
   }, [])
+
+  if (error) {
+    return <Error title="An error occured" message={error.message}/>
+  }
 
 
   return (
@@ -31,3 +51,4 @@ export default function AvailablePlaces({ onSelectPlace}) {
     />
   );
 }
+
